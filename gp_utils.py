@@ -53,7 +53,6 @@ def gp_to_pysym_with_coef(est_gp, ode, tol=None, tol2=None, expand=False):
         f_star_sympy = sympy.expand(f_star_sympy)
 
     fs = str(f_star_sympy)
-    print(fs)
 
     fs = mask_X(fs)
     if tol is None:
@@ -71,7 +70,6 @@ def gp_to_pysym_with_coef(est_gp, ode, tol=None, tol2=None, expand=False):
                 fs = fs.replace(const, 'C')
 
     fs = back_X(fs)
-    print(fs)
     f_star_sympy = generator.Generator.infix_to_sympy(fs, VarDict, "simplify")
     return f_star_sympy
 
@@ -104,10 +102,6 @@ def parse_program_to_list(program):
     var_list = list(set(var_list))
     coef_list = list(set(coef_list))
     return symbol_list, var_list, coef_list
-
-
-pow2 = make_function(lambda x: x ** 2, 'pow2', 1)
-pow3 = make_function(lambda x: x ** 3, 'pow3', 1)
 
 
 def run_gp(X_train, y_train, ode, x_id=0, seed=0):
@@ -148,7 +142,6 @@ def run_gp_ode(ode_data, X_train, y_train, ode, x_id=0, seed=0):
     est_gp = SymbolicODE(random_state=seed, **config)
 
     est_gp.fit(X_train, y_train, ode_data=ode_data)
-    print(est_gp._program)
     if ode.name == 'SelkovODE':
         a = gp_to_pysym_with_coef(est_gp, ode, tol=0.05, tol2=0.01, expand=True)
     else:

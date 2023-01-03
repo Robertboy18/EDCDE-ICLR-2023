@@ -10,7 +10,7 @@ from integrate import generate_grid
 from derivative import dxdt
 
 
-def get_ode_data_noise_free(yt, x_id, dg, ode):
+def get_ode_data_noise_free(yt, x_id, dg, ode, derivative):
     t = dg.solver.t
     freq = dg.freq
     t_new = t
@@ -27,15 +27,23 @@ def get_ode_data_noise_free(yt, x_id, dg, ode):
 
     basis_func = basis(dg.T, n_basis)
 
-    g_dot = basis_func.design_matrix(t_new, derivative=True)
-    g = basis_func.design_matrix(t_new, derivative=False)
+    derivative_list =  []
+
+    for i in range(derivative+1):
+        derivative_list.append(basis_func.design_matrix(t_new,i))
 
     Xi = X_sample[:, :, x_id]
 
-    c = (Xi * weight[:, None]).T @ g_dot
+    g = derivative_list[0]
+    g_dot1 = derivative_list[1]
+    g_dot2 = derivative_list[2]
+    g_dot3 = derivative_list[3]
+    
+    c = derivative*(Xi * weight[:, None]).T @ (g*g*g_dot3 + 6*g*g_dot1*g_dot2 + 2*g_dot1**3)
+
     ode_data = {
         'x_hat': X_sample,
-        'g': g,
+        'g': derivative_list[0],
         'c': c,
         'weights': weight
     }
@@ -45,13 +53,13 @@ def get_ode_data_noise_free(yt, x_id, dg, ode):
     return ode_data, X_ph, y_ph, t_new
 
 
-def get_ode_data(yt, x_id, dg, ode, config_n_basis=None, config_basis=None):
+def get_ode_data(yt, x_id, dg, ode, config_n_basis, config_basis, derivative):
     t = dg.solver.t
     noise_sigma = dg.noise_sigma
     freq = dg.freq
 
     if noise_sigma == 0:
-        return get_ode_data_noise_free(yt, x_id, dg, ode)
+        return get_ode_data_noise_free(yt, x_id, dg, ode, derivative)
 
     X_sample_list = list()
     pca_list = []
@@ -92,16 +100,27 @@ def get_ode_data(yt, x_id, dg, ode, config_n_basis=None, config_basis=None):
         basis = config['basis']
     else:
         basis = config_basis
-
+    
     basis_func = basis(dg.T, n_basis)
-    g = basis_func.design_matrix(t_new, derivative=False)
+    g = basis_func.design_matrix(t_new, 0)
 
     # compute c using a much larger grid
     t_new_c, weight_c = generate_grid(dg.T, 1000)
-    g_dot = basis_func.design_matrix(t_new_c, derivative=True)
     Xi = pca_list[x_id].get_predictive(new_sample=1, t_new=t_new_c)
     Xi = Xi.reshape(len(t_new_c), Xi.size // len(t_new_c))
-    c = (Xi * weight_c[:, None]).T @ g_dot
+
+    derivative_list =  []
+
+    for i in range(derivative+1):
+        derivative_list.append(basis_func.design_matrix(t_new_c, i))
+    
+    # now compute c
+    g = derivative_list[0]
+    g_dot1 = derivative_list[1]
+    g_dot2 = derivative_list[2]
+    g_dot3 = derivative_list[3]
+    
+    c = derivative*(Xi * weight_c[:, None]).T @ (g*g*g_dot3 + 6*g*g_dot1*g_dot2 + 2*g_dot1**3)
 
     ode_data = {
         'x_hat': X_sample,
@@ -234,7 +253,6 @@ class Interpolator:
 class InterpolatorSmoothing:
     def __init__(self):
         pass
-
 
 
 def process_data(X, t_obs, basis, method='lstsq'):

@@ -104,7 +104,7 @@ class ODE(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def _dx_dt(self, *args):
         pass
-
+    
     @staticmethod
     def get_var_dict():
         return get_var_pos()
@@ -124,6 +124,12 @@ class ODE(metaclass=abc.ABCMeta):
         for i in range(self.dim_x):
             arg_list.append(x[:, :, i])
         return np.stack(self._dx_dt(*arg_list), axis=-1)
+    
+    def dx_dt_2batch(self, t, x):
+        arg_list = list()
+        for i in range(self.dim_x):
+            arg_list.append(x[:, :, i])
+        return np.stack(self._dx_dt_2(*arg_list), axis=-1)
 
     @abc.abstractmethod
     def functional_theta(self, theta):
@@ -156,6 +162,20 @@ class ODESolver:
         res = np.stack(res_list, axis=-1)
         # D, T
         return res
+    
+    def solve_two(self, init):
+        ode = scipy.integrate.ode(self.ode.dx_dt).set_integrator(self.integrator)
+        ode.set_initial_value(init, 0)
+
+        res_list = [init]
+
+        while ode.successful() and ode.t < self.T:
+            res = ode.integrate(ode.t + self.dt)
+            res_list.append(res)
+        res = np.stack(res_list, axis=-1)
+        # D, T
+        return res
+
 
     def solve(self, init_list):
         res_list = []
@@ -206,9 +226,6 @@ class LinearODE(ODE):
 
     def get_default_param(self):
         return [np.array([[0, 1], [-1, 0]])]
-
-    def _dx_dt(self, t, x):
-        pass
 
     def dx_dt(self, t, x):
         x = np.array(x)
@@ -404,6 +421,44 @@ class LogisticODE(ODE):
         self.has_coef = True
         self.name = 'LogisticODE'
         self.std_base = 0.31972985438694346
+        #print(self.a, self.k)
+
+    def _dx_dt(self, X):
+        dxdt = self.a * X* (1 - np.power(X, self.k))
+        #dxxdtt = dxxdtt + dxdt
+        return [dxdt]
+
+    def get_default_param(self):
+        return 1., 0.5
+
+    def get_expression(self):
+        var_dict = self.get_var_dict()
+        X0 = var_dict['X0']
+        C = var_dict['C']
+        if self.has_coef:
+            eq1 = X0 - X0 ** C
+        else:
+            eq1 = (1 - X0) * X0
+        return [eq1]
+
+    def functional_theta(self, theta):
+        assert len(theta) == 2
+        new_ode = LogisticODE(theta)
+        return new_ode.dx_dt_batch
+
+class LogisticODE2(ODE):
+    """
+    Logistic
+    https://en.wikipedia.org/wiki/Logistic_function#Logistic_differential_equation
+    """
+
+    def __init__(self, param=None):
+        super().__init__(1, param)
+        self.a, self.k = self.param
+        self.T = 10
+        self.has_coef = True
+        self.name = 'LogisticODE2'
+        self.std_base = 0.31972985438694346
 
     def _dx_dt(self, X):
         dxdt = self.a * (1 - np.power(X, self.k)) * X
@@ -517,6 +572,7 @@ class LvODE(ODE):
         super().__init__(2, param)
         self.a, self.c, self.gamma = self.param
         self.init_high = 1.
+        self.name = 'LvODE'
         self.T = 15
 
     def _dx_dt(self, X, Y):

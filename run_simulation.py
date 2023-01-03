@@ -47,10 +47,7 @@ def run(ode_name, ode_param, x_id, freq, n_sample, noise_ratio, alg, seed, n_see
 
     print('Numerical differentiation: Done.')
 
-    # if alg != 'gp':
     X_train = yt[:-1, :, :]
-    # else:
-    #     X_train = xt_hat[:-1, :, :]
     X_train = X_train.reshape(X_train.shape[0] * X_train.shape[1], X_train.shape[2])
 
     y_train = dxdt_hat[:, :, x_id].flatten()
@@ -104,8 +101,9 @@ def run(ode_name, ode_param, x_id, freq, n_sample, noise_ratio, alg, seed, n_see
                 'time': end-start,
             }, f)
 
-        print(f_hat)
-        print(correct)
+        print("Model found", f_hat)
+        print("True model", f_true)
+        print("Correct", correct)
 
 
 if __name__ == '__main__':
@@ -118,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument("--noise_sigma", help="noise level (default 0)", type=float, default=0.)
     parser.add_argument("--alg", help="name of the benchmark", type=str, default='tv', choices=['tv', 'spline', 'gp'])
     parser.add_argument("--seed", help="random seed", type=int, default=0)
-    parser.add_argument("--n_seed", help="random seed", type=int, default=10)
+    parser.add_argument("--n_seed", help="random seed", type=int, default=1)
 
     args = parser.parse_args()
     print('Running with: ', args)

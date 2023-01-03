@@ -14,19 +14,12 @@ class BasisFunction(metaclass=abc.ABCMeta):
         self.current_basis = i
 
     @abc.abstractmethod
-    def phi_t(self, t):
+    def general_dphi_dt(self, t, k, derivative):
         """
-        Evaluate basis function with order at time t
-        """
-        pass
-
-    @abc.abstractmethod
-    def dphi_dt(self, t):
-        """
-            Evaluate the derivative of the basis function with order at time t
+        Evaluate basis function with order at time t and derivative for upto any order
         """
         pass
-
+    
     @abc.abstractmethod
     def design_matrix(self, t, derivative=False):
         """
@@ -50,19 +43,17 @@ class FourierBasis(BasisFunction):
         self.name = 'FourierBasis'
 
     def set_current_basis(self, i):
-        # [0, n_basis)
         assert i < self.n_basis
         self.current_basis = i + 1
 
-    def phi_t(self, t):
+    def general_dphi_dt(self, t, k, derivative):
         t = t / self.T
-        return self.sqrt_2 * np.sin(self.current_basis * np.pi * t)
+        if derivative%2 == 0:
+            return pow(-1,k) * self.sqrt_2 * np.sin(self.current_basis * np.pi * t) * (self.current_basis**derivative) * ((np.pi / self.T)**derivative)
+        else:
+            return pow(-1,k) * self.sqrt_2 * np.cos(self.current_basis * np.pi * t) * (self.current_basis**derivative) * ((np.pi / self.T)**derivative)
 
-    def dphi_dt(self, t):
-        t = t / self.T
-        return self.sqrt_2 * np.cos(self.current_basis * np.pi * t) * self.current_basis * np.pi / self.T
-
-    def design_matrix(self, t, derivative=False):
+    def design_matrix(self, t, derivative_to_use):
         # t: time steps of observations
 
         cols = []
@@ -70,10 +61,10 @@ class FourierBasis(BasisFunction):
 
         for i in range(self.n_basis):
             self.current_basis = i + 1
-            if not derivative:
-                cols.append(self.phi_t(t))
+            if derivative_to_use%4 == 0 or derivative_to_use%4 == 1:
+                cols.append(self.general_dphi_dt(t, 0, derivative_to_use))
             else:
-                cols.append(self.dphi_dt(t))
+                cols.append(self.general_dphi_dt(t, 1, derivative_to_use))
 
         mat = np.stack(cols, axis=-1)
         self.current_basis = save
@@ -81,6 +72,7 @@ class FourierBasis(BasisFunction):
 
     def get_nonzero_range(self):
         return 0, self.T
+
 
 
 class CubicSplineBasis(BasisFunction):

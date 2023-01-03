@@ -1,5 +1,5 @@
-# D-CODE-ICLR-2022
-Code for [D-CODE: Discovering Closed-form ODEs from Observed Trajectories (ICLR 2022)](https://openreview.net/forum?id=wENMvIsxNN).
+# [Re] D-CODE-ICLR-2022
+Reproducibility Code for [D-CODE: Discovering Closed-form ODEs from Observed Trajectories (ICLR 2022)](https://openreview.net/forum?id=wENMvIsxNN) and an extension of the algorithm.
 
 
 
@@ -10,19 +10,11 @@ Python 3.6+ is recommended. Install dependencies as per [`requirements.txt`](./r
 
 ## Replicating Experiments
 
-Shell scripts to replicate the experiments can be found in [`run_all.sh`](./run_all.sh).
-
-To run all the synthetic data experiments:
-```bash
-$ bash run_all.sh
-```
-You may also run the experiment steps individually, see [`run_all.sh`](./run_all.sh). 
-To then produce the figures, run the Jupyter notebooks `Result Summary.ipynb`, `Fig3.ipynb`, `Fig5.ipynb`, `rebuttal.ipynb`.
-
+To run the extension algorithm simply open the [`final_extension.ipynb`](./final_extension.ipynb) notebook and run all cells. One can also just run the ['run_sensitivity_vi.py'](./run_sensitivity_vi.py) script to run the sensitivity analysis for the VI algorithm. The results will be saved in the [`results`](./results) folder.
 
 ## Citing
 
-If you use this code, please cite the associated paper:
+If you use this code, please cite the original paper:
 
 ```
 @inproceedings{NEURIPS2021,

@@ -26,6 +26,8 @@ def get_config(ode, x_id=0):
         else:
             print('loading config for X2')
             return lorenz_config_x2
+    elif ode.name == 'LvODE':
+        return lvode_config
 
 
 def get_interpolation_config(ode, x_id=0):
@@ -44,6 +46,8 @@ def get_interpolation_config(ode, x_id=0):
         return real_interp_config
     elif ode.name == 'FracODE':
         return frac_interp_config
+    elif ode.name == 'LvODE':
+        return lvode_interp_config
     else:
         raise ValueError
 
@@ -95,6 +99,15 @@ lorenz_interp_config = {
 }
 
 lorenz_interp_config2 = {
+    'r': -1,
+    'sigma_in': 0.1,
+    'freq_int': 100,
+    'new_sample': 5,
+    'n_basis': 50,
+    'basis': basis.FourierBasis,
+}
+
+lvode_interp_config = {
     'r': -1,
     'sigma_in': 0.1,
     'freq_int': 100,
@@ -169,7 +182,7 @@ logistic_config = {'population_size': 15000,
                    'p_subtree_mutation': 0.133,
                    'p_hoist_mutation': 0.0361,
                    'p_point_mutation': 0.0905,
-                   'function_set': {'sub': 1, 'mul': 1, 'pow': 1, 'add': 1},
+                   'function_set': {'sub': 1, 'mul': 1, 'add': 1},
                    'const_range': (1., 2.),
                    'generations': 20,
                    'stopping_criteria': 0.01,
@@ -250,6 +263,23 @@ lorenz_config_x1 = {'population_size': 15000,
                    }
 
 lorenz_config_x2 = {'population_size': 15000,
+                   'p_crossover': 0.6903,
+                   'p_subtree_mutation': 0.133,
+                   'p_hoist_mutation': 0.0361,
+                   'p_point_mutation': 0.0905,
+                   'function_set': {'sub': 1, 'mul': 3, 'add': 1},
+                   'const_range': (1.1, 5),
+                   'generations': 20,
+                   'stopping_criteria': 0.01,
+                   'max_samples': 0.9,
+                   'verbose': 0,
+                   'parsimony_coefficient': 0.01,
+                   'init_depth': (1, 6),
+                   'n_jobs': 2,
+                   'low_memory': True
+                   }
+
+lvode_config = {'population_size': 15000,
                    'p_crossover': 0.6903,
                    'p_subtree_mutation': 0.133,
                    'p_hoist_mutation': 0.0361,

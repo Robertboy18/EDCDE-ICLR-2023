@@ -30,7 +30,7 @@ def run(ode_name, ode_param, x_id, freq, n_sample, noise_ratio, seed, n_seed, n_
     dg = data.DataGenerator(ode, T, freq, n_sample, noise_sigma, init_low, init_high)
     yt = dg.generate_data()
 
-    ode_data, X_ph, y_ph, t_new = get_ode_data(yt, x_id, dg, ode, n_basis, basis_obj)
+    ode_data, X_ph, y_ph, t_new = get_ode_data(yt, x_id, dg, ode, n_basis, basis_obj, 3)
 
     path_base = 'results_vi/{}/noise-{}/sample-{}/freq-{}/n_basis-{}/basis-{}'.\
         format(ode_name, noise_ratio, n_sample, freq, n_basis, basis_str)
@@ -73,8 +73,9 @@ def run(ode_name, ode_param, x_id, freq, n_sample, noise_ratio, seed, n_seed, n_
                 'time': end - start,
             }, f)
 
-        print(f_hat)
-        print(correct)
+        print("Model found", f_hat)
+        print("True model", f_true)
+        print("Correct", correct)
 
 
 if __name__ == '__main__':
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument("--x_id", help="ID of the equation to be learned", type=int, default=0)
     parser.add_argument("--freq", help="sampling frequency", type=float, default=10)
     parser.add_argument("--n_sample", help="number of trajectories", type=int, default=100)
-    parser.add_argument("--noise_sigma", help="noise level (default 0)", type=float, default=0.)
+    parser.add_argument("--noise_sigma", help="noise level (default 0)", type=float, default=0.0)
     parser.add_argument("--n_basis", help="number of basis function", type=int, default=50)
     parser.add_argument("--basis", help="basis function", type=str, default='sine')
 

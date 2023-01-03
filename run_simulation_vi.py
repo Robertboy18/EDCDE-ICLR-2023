@@ -69,8 +69,10 @@ def run(ode_name, ode_param, x_id, freq, n_sample, noise_ratio, seed, n_seed):
                 'time': end - start,
             }, f)
 
-        print(f_hat)
-        print(correct)
+
+        print("Model found", f_hat)
+        print("True model", f_true)
+        print("Correct", correct)
 
 
 if __name__ == '__main__':
