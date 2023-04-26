@@ -1,5 +1,5 @@
-# [Re] D-CODE-ICLR-2022
-Reproducibility Code for [D-CODE: Discovering Closed-form ODEs from Observed Trajectories (ICLR 2022)](https://openreview.net/forum?id=wENMvIsxNN) and an extension of the algorithm.
+# ECODE-ICLR-2023
+Code for [EDCDE - Extended Discovery of Closed-Form Differential Equations](https://openreview.net/forum?id=EVz_vcZQvvg&referrer=%5BAuthor%20Console%5D(%2Fgroup%3Fid%3DICLR.cc%2F2023%2FTinyPapers%2FAuthors%23your-submissions)) and an extension of the algorithm.
 
 
 
